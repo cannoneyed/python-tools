@@ -295,11 +295,11 @@ PythonTools = {
     else
       atom.notifications.addInfo("python-tools could not find any results!")
 
-  jediToolsRequest: (type, textEditor, range) ->
+  jediToolsRequest: (type, textEditor, position) ->
     editor = textEditor or atom.workspace.getActiveTextEditor()
     grammar = editor.getGrammar()
 
-    bufferPosition = range or editor.getCursorBufferPosition()
+    bufferPosition = position or editor.getCursorBufferPosition()
 
     payload = {
       type: type,
@@ -322,14 +322,16 @@ PythonTools = {
     )
 
   getProvider: () ->
+    jediToolsRequest = @jediToolsRequest.bind(this)
     return {
+      priority: 10,
       getSuggestionForWord: (textEditor, text, range) ->
         return {
           # The range(s) to underline as a visual cue for clicking.
           range,
           # The function to call when the underlined text is clicked.
           callback: () ->
-            @jediToolsRequest('gotoDef', textEditor, range)
+            return jediToolsRequest('gotoDef', textEditor, range.start)
         }
     }
 }
